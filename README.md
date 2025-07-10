@@ -8,9 +8,7 @@ Detects hidden data in images using machine learning.
 - Streamlit app: upload image, see prediction, feature importance & confusion matrix.
 - Visual explanations using SHAP.
 
-## 🚀 Quick start
-```bash
-pip install -r requirements.txt
-python generate_dataset.py
-python train_model.py
-streamlit run streamlit_app.py
+![Screenshot (15)](https://github.com/user-attachments/assets/173c1faa-2a4a-4453-b42a-bfca9c6ab374)
+
+![Screenshot (16)](https://github.com/user-attachments/assets/49bf0ec1-7e37-47cf-be3b-2dbe7d270f97)
+
