@@ -1,29 +1,16 @@
-# steganography-detector
 # 🖼️ Steganography Detector
 
-Detects hidden data in images using ML features like color histograms, edge maps, compression ratio, and DCT energy.
+Detects hidden data in images using machine learning.
 
-## 🚀 Features
-- Upload JPG/PNG images via Streamlit
-- Extract and visualize key image features
-- Predict if image is "Stego" or "Clean"
-- Download CSV prediction report
+## 📦 Features
+- Extracts color, statistical & frequency features.
+- Trains a Random Forest classifier to detect stego images.
+- Streamlit app: upload image, see prediction, feature importance & confusion matrix.
+- Visual explanations using SHAP.
 
-## 📦 Tech Stack
-- Python, OpenCV, Scikit-learn, Streamlit
-- RandomForest for classification
-
-## 🧠 How it Works
-Features extracted:
-- Color Histogram
-- Edge Density
-- Compression Ratio
-- DCT Energy
-
-## 🖥️ Run Locally
-
+## 🚀 Quick start
 ```bash
-git clone https://github.com/YOUR_USERNAME/steganography-detector.git
-cd steganography-detector
 pip install -r requirements.txt
-streamlit run app/stego_app.py
+python generate_dataset.py
+python train_model.py
+streamlit run streamlit_app.py

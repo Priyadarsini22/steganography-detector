@@ -1,5 +1,3 @@
-# 📂 File: stego_app.py
-
 import os
 import cv2
 import numpy as np
@@ -20,7 +18,6 @@ def extract_features(img_path):
         return None
 
     features = {}
-
     features['file_size'] = os.path.getsize(img_path)
     features['width'] = img.shape[1]
     features['height'] = img.shape[0]
@@ -28,7 +25,6 @@ def extract_features(img_path):
     features['mean'] = img.mean()
     features['std'] = img.std()
 
-    # Color histogram
     chans = cv2.split(img)
     colors = ('b', 'g', 'r')
     for i, chan in enumerate(chans):
@@ -36,7 +32,6 @@ def extract_features(img_path):
         hist = cv2.normalize(hist, hist).flatten()
         features[f'hist_mean_{colors[i]}'] = np.mean(hist)
 
-    # Compression ratio
     pil_img = Image.open(img_path)
     if pil_img.mode == "RGBA":
         pil_img = pil_img.convert("RGB")
@@ -45,15 +40,12 @@ def extract_features(img_path):
     compressed_size = len(buf.getvalue())
     features['compression_ratio'] = features['file_size'] / compressed_size
 
-    # DCT energy
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     dct_trans = dct(dct(gray.astype(float), axis=0), axis=1)
     features['dct_energy'] = np.sum(np.square(dct_trans)) / (features['width'] * features['height'])
 
-    # Edge density
     edges = cv2.Canny(gray, 100, 200)
-    edge_density = np.sum(edges > 0) / (features['width'] * features['height'])
-    features['edge_density'] = edge_density
+    features['edge_density'] = np.sum(edges > 0) / (features['width'] * features['height'])
 
     return pd.DataFrame([features])
 
@@ -61,9 +53,8 @@ def extract_features(img_path):
 st.set_page_config(page_title="Steganography Detector", page_icon="🖼️")
 st.title("🖼️ Steganography Detector")
 
-st.markdown("This app detects whether an image may contain hidden data using machine learning. Upload an image and view detailed analysis below.")
+st.markdown("This app detects hidden data in images using machine learning. Upload an image to analyze:")
 
-# Upload
 uploaded = st.file_uploader("Upload an image (JPG/PNG)", type=["jpg", "jpeg", "png"])
 
 if uploaded:
@@ -79,13 +70,15 @@ if uploaded:
         proba = model.predict_proba(features)
         prediction = model.predict(features)[0]
         label = "🔴 Possibly Stego" if prediction == 1 else "🟢 Clean"
+        conf = proba[0][prediction]
 
-        tab1, tab2, tab3 = st.tabs(["📊 Prediction", "🧠 Feature Importance", "📷 Image Analysis"])
+        tab1, tab2, tab3, tab4 = st.tabs(["📊 Prediction", "🧠 Feature Importance", "📷 Image Analysis", "📈 Evaluation"])
 
         with tab1:
             st.image("temp.jpg", caption="Uploaded Image", width=300)
             st.markdown(f"## Prediction: {label}")
-            st.metric("Confidence", f"{proba[0][prediction]:.2f}")
+            st.progress(conf)
+            st.write(f"**Confidence:** {conf:.2f}")
 
             report = features.copy()
             report['prediction'] = label
@@ -95,14 +88,15 @@ if uploaded:
             st.markdown(href, unsafe_allow_html=True)
 
         with tab2:
+            st.subheader("Top Features (from training)")
             try:
                 with open("top_features.json") as f:
                     top_feats = json.load(f)
-                st.markdown("#### 🔍 Top Contributing Features:")
                 for feat, val in top_feats:
                     st.write(f"- **{feat}** → `{val:.4f}`")
             except:
-                st.info("📉 Feature importance file not found or not generated.")
+                st.info("📉 Feature importance not found.")
+            st.image("shap_summary.png", caption="SHAP summary plot")
 
         with tab3:
             st.subheader("Edge Map")
@@ -117,8 +111,12 @@ if uploaded:
                 ax.plot(hist, color=col)
             st.pyplot(fig)
 
-            with st.expander("📑 See Raw Image Features"):
+            with st.expander("📑 Raw Image Features"):
                 st.dataframe(features.T)
+
+        with tab4:
+            st.subheader("Confusion Matrix (from model)")
+            st.image("confusion_matrix.png", caption="Model Confusion Matrix")
 
     else:
         st.warning("⚠️ Could not read the image.")

@@ -1,8 +1,9 @@
 
-
 opencv-python
 streamlit
+numpy
 pandas
 scikit-learn
-Pillow
 matplotlib
+pillow
+scipy
